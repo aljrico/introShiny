@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Shiny</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alejandro J Rico" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/mytheme.css" type="text/css" />
+    <link rel="stylesheet" href="css/mytheme-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+class: title-slide, right, top
+background-image: url(img/bg.jpg)
+background-position: 75% 75%
+background-size: cover
+
+.right-column[
+&lt;br&gt;
+# Introduction to Shiny
+### The &lt;b&gt;R&lt;/b&gt; path to Software Development
+
+**Alejandro J Rico**&lt;br&gt;
+6th of September, 2021
+]
+
+---
+name: about-me
+layout: false
+class: about-me-slide, inverse, middle, center
+
+# About me
+
+  &lt;img style="border-radius: 50%;" src="img/avatar.png" width="150px"/&gt;
+
+  ## Alejandro J Rico
+
+  .fade[R Developer]
+  
+  .list[
+    [<i class="fa fa-home" role="presentation" aria-label="home icon"></i> aljrico.com](https://aljrico.com) &lt;br&gt;
+    [<i class="fab fa-twitter" role="presentation" aria-label="twitter icon"></i> @aljrico](https://twitter.com/aljrico) &lt;br&gt;
+    [<i class="fab fa-github" role="presentation" aria-label="github icon"></i> /aljrico](https://github.com/aljrico) &lt;br&gt;
+  ]
+
+---
+
+name: outline
+layout: false
+class: top
+
+# Outline
+
+.pull-left-wide[
+#####<i class="fa fa-star" role="presentation" aria-label="star icon"></i> What is Shiny?
+#####<i class="fa fa-seedling" role="presentation" aria-label="seedling icon"></i> Your First Shiny App
+#####<i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Inputs and Outputs
+#####<i class="fa fa-play" role="presentation" aria-label="play icon"></i> Understanding Reactivity
+#####<i class="fa fa-palette" role="presentation" aria-label="palette icon"></i> UI Design
+#####<i class="fa fa-wind" role="presentation" aria-label="wind icon"></i> Dynamic UI
+#####<i class="fa fa-magic" role="presentation" aria-label="magic icon"></i> Extending Shiny with JavaScript
+]
+
+---
+
+
+name: what_is_shiny
+
+#<i class="fa fa-star" role="presentation" aria-label="star icon"></i> What is Shiny?
+
+&gt; Shiny is a _framework_ for creating web applications with R. Which essentially means a combination of libraries, software environments and pre-cooked components.
+
+Shiny encapsulates functionality built with HTML, CSS and JavaScript. This way we can develop web-based applications using only R.
+
+
+```r
+shiny::div(class = "container-fluid",
+  shiny::span(
+    "Different roads sometimes lead to the same castle."
+  )
+) %&gt;% 
+  print()
+```
+
+```
+## &lt;div class="container-fluid"&gt;
+##   &lt;span&gt;Different roads sometimes lead to the same castle.&lt;/span&gt;
+## &lt;/div&gt;
+```
+
+---
+
+name: what_is_shiny2
+
+The `shiny` library also includes pre-built examples
+
+```r
+shiny::runExample()
+```
+
+```
+## Valid examples are "01_hello", "02_text", "03_reactivity", "04_mpg", "05_sliders", "06_tabsets", "07_widgets", "08_html", "09_upload", "10_download", "11_timer"
+```
+
+---
+
+name: your_first_shiny_app
+
+#<i class="fa fa-seedling" role="presentation" aria-label="seedling icon"></i> Your First Shiny App
+
+At its core, you can split any web-application in two fundamental components: The *User Interface* (UI) and the *Server*. The UI will describe the looks of an app, whereas the Server will describe the app's logic.
+
+
+```r
+library(shiny)
+ui &lt;- fluidPage()
+server &lt;- function(input, output){}
+```
+
+One you've got the fundamental components defined, you can use the following function to launch and execute the app: 
+
+
+```r
+shinyApp(ui = ui, server = server)
+```
+
+---
+
+name: your_first_shiny_app2
+
+Once you get this clear distinction, you can experiment by adding any extra pieces to the UI. If you get very creative about it, you can use it build any kind of website you can think of.
+
+
+```r
+library(shiny)
+ui &lt;- fluidPage(
+  div(
+    style = 'text-align: center',
+    h1("Our mighty app"),
+    span("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Neque laoreet suspendisse interdum consectetur libero.")
+  )
+)
+server &lt;- function(input, output){}
+shinyApp(ui = ui, server = server)
+```
+
+---
+
+
+name: inputs_and_outputs
+
+#<i class="fa fa-comments" role="presentation" aria-label="comments icon"></i> Inputs and Outputs
+
+The main characteristic of web-*applications* is that they allow for complex interactivity with the user. That is, the user *does* something and the app reacts to it.
+
+* Example: Text Input
+
+
+```r
+ui &lt;- fluidPage(
+  textInput(
+    inputId = "inputText",
+    label = "Introduce some text here"
+  ),
+  h3(textOutput("outputText"))
+)
+server &lt;- function(input, output, session ){
+  output$outputText &lt;- renderText({
+    input$inputText
+  })
+}
+```
+
+---
+
+name: understanding_reactivity
+
+#<i class="fa fa-play" role="presentation" aria-label="play icon"></i> Understanding Reactivity
+
+&gt; We have seen how the user changes the **input**, the server *reacts* to that by updating the **output**. The logic that describes how inputs and outputs communicate with each other is what we call **reactivity**.
+
+You can think of reactivity as the process by which Shiny constantly tries to update all outputs. In order to do so, it will parse all internal dependencies in case they change. 
+
+When a user changes the value of an **input**, the `render({})` call detects it and re-executes itself, so the output gets updated.
+
+---
+
+name: understanding_reactivity2
+
+* Example: Two Outputs from One Input
+
+
+```r
+ui &lt;- fluidPage(
+  numericInput("sampleSize", "Select size", min = 50, max = 150, value = 100),
+  ploutOutput("facet"),
+  verbatimTextOutput("summary")
+)
+
+server &lt;- function(input, output){
+  output$facet &lt;- renderPlot({
+    dat &lt;- iris[sample(input$sampleSize), ]
+    plot(x = dat$Sepal.Length, y = dat$Sepal.Width)
+  })
+  output$summary &lt;- renderPrint({
+    dat &lt;- iris[sample(input$sampleSize), ]
+    summary(dat)
+  })
+}
+```
+
+---
+
+name: understanding_reactivity3
+
+## Reactive Expressions
+
+The `render` functions create what we call *reactive contexts*. But we can create our own reactive contexts outside of them, and later refer to them by using `reactive()` expressions.
+
+
+```r
+ui &lt;- fluidPage(
+  numericInput("sampleSize", "Select size", min = 50, max = 150, value = 100),
+  ploutOutput("facet"),
+  verbatimTextOutput("summary")
+)
+server &lt;- function(input, output){
+  getSample &lt;- reactive({iris[sample(input$sampleSize), ]})
+  output$facet &lt;- renderPlot({
+    dat &lt;- getSample()
+    plot(x = dat$Sepal.Length, y = dat$Sepal.Width)
+  })
+  output$summary &lt;- renderPrint({
+    dat &lt;- getSample()
+    summary(dat)
+  })
+}
+```
+
+
+---
+
+name: understanding_reactivity4
+
+## Delayed Reactivity
+
+So far all our reactive contexts re-execute themselves at every change. What if we want to control the reactivity to get triggered only with certain dependencies? 
+
+
+```r
+ui &lt;- fluidPage(
+  sliderInput("sampleSize", "Select N", min = 50, max = 500, value = 100),
+  sliderInput("sampleMean", "Select Mean", min = -10, max = 10, value = 0),
+  sliderInput("sampleSd", "Select SD", min = 1, max = 10, value = 1),
+  plotOutput("histogram")
+)
+server &lt;- function(input, output){
+  getSample &lt;- reactive({rnorm(n = input$sampleSize, mean = input$sampleMean, sd = input$sampleSd)})
+  output$histogram &lt;- renderPlot({
+    dat &lt;- getSample()
+    hist(dat)
+  })
+}
+```
+
+---
+
+### Isolating reactivity
+
+We can *isolate* some of the dependencies, so they don't trigger reactivity.
+
+
+```r
+server &lt;- function(input, output){
+  getSample &lt;- reactive({
+    rnorm(n = isolate({input$sampleSize}), 
+          mean = input$sampleMean, 
+          sd = input$sampleSd)
+    })
+  output$histogram &lt;- renderPlot({
+    dat &lt;- getSample()
+    hist(dat)
+  })
+}
+```
+
+---
+
+### Event-based reactivity
+
+The opposite of creating a reactive expression and later isolate parts of its dependencies, is to create a reactive expression that only depends on pre-specified values. We can do this using `eventReactive()` instead of `reactive()`
+
+
+```r
+server &lt;- function(input, output){
+  getSample &lt;- eventReactive(input$sampleSize, {
+    rnorm(n = input$sampleSize, mean = input$sampleMean, sd = input$sampleSd)
+    })
+  
+  output$histogram &lt;- renderPlot({
+    dat &lt;- getSample()
+    hist(dat)
+  })
+}
+```
+
+---
+
+
+## Reactivity without Outputs
+
+Now let's imagine that you want the R server to *react* to something. But you don't want to display that back to the user. You're only interested in the side effect of it.
+
+Shiny has some *fake* outputs. They walk, bark and behave like outputs. But they don't *output* anything to the UI. These are called **observers**.
+
+* Example: Random Number Generator
+
+
+```r
+ui &lt;- fluidPage(
+  actionButton("btn1", label = "Show me the number"),
+  actionButton("btn2", label = "Do not show me the number"),
+  textOutput("randomNumber")
+)
+server &lt;- function(input, output){
+  output$randomNumber &lt;- renderText({
+    input$btn1
+    runif(1, min = 0, max = 100) %&gt;% floor()
+  })
+  observe({
+    input$btn2
+    runif(1, min = 0, max = 100) %&gt;% floor() %&gt;% print()
+  })
+}
+```
+
+---
+
+name: ui_design
+#<i class="fa fa-palette" role="presentation" aria-label="palette icon"></i> UI Design
+
+We have been using the `fluidPage()` function to design the top-level layout of the UI. But Shiny includes a lot more pre-built layouts that can be used.
+
+* sidebarLayout
+* flowLayout
+* splitLayout
+* verticalLayout
+
+---
+
+## Rows and Columns
+
+Pre-made layouts are useful to quickly get pretty standard layouts. But we can do more than that. We can design our own layouts by using a grid system.
+
+There is no `gridLayout()` function. We design what the layout should look like by using `fluidRow()` and `column()`.
+
+* Example: Custom layout
+
+![Grid Layout](img/grid.jpg)
+
+
+---
+
+## Tabs
+
+So far we have explored layout designs. But all of them are always rendered at the same time. Everything is always visible no matter what.
+
+We can change that by using **tabs**. Shiny has already inbuilt functionality to deal with them by using the `tabsetPanel()` function.
+
+
+```r
+ui &lt;- fluidPage(
+  mainPanel(
+    tabPanel("Plot", h2("Some visualisation outputs")),
+    tabPanel("Data", h2("Raw data outputs")),
+    tabPanel("About", h2("Cheeky About Page"))
+  )
+)
+```
+
+## Shiny Dashboard
+
+You could use the grid system layouts and tab panels to come up with pretty complex and sofisticated UI designs. But more often than not, what Shiny is used to make *Dashboards*. 
+
+Making a Dashboard from the ground up is quite a bit of work in the UI. Luckily, there is an R library that provides handy functionality to build it easily: `shinydashboard`
+
+
+```r
+library(shinydashboard)
+ui &lt;- dashboardPage(
+  dashboardHeader(),
+  dashboardSidebar(...),
+  dashboardBody(...)
+)
+```
+
+
+---
+
+name: dynamic_ui
+#<i class="fa fa-wind" role="presentation" aria-label="wind icon"></i> Dynamic UI
+
+Every UI we have done so far is what we'd call *static*. It doesn't change. It can be hidden behind a `tabPanel()`, but we haven't allowed the user to modify it on-the-go. 
+
+In this section we will explore how this functionality can be allowed within Shiny.
+
+---
+
+
+## Updating Inputs
+
+We have seen how shiny includes some pre-defined peces of UI that we call inputs. These inputs are designed so its communication with the server is seamless. 
+
+So far, we've explored how the inputs can gather information and send it to the server so it does something with it. But we can also use the server to send back something to the inputs and affect them.
+
+
+```r
+ui &lt;- fluidPage(
+  titlePanel("Our Mighty App"),
+  textInput("text", "Choose button's label"),
+  actionButton("btn", "")
+)
+
+server &lt;- function(input, output, session){
+  observe({
+    updateActionButton(inputId = "btn", label = input$text)
+  })
+}
+```
+
+---
+
+## Server-Rendered UI
+
+Until now, all the UI that we have created has been *rendered* by the user's browser. It only gets executed when the web opens up (or refreshes) and never again. We have explored some shenanigans so we can later on modify it. But it's also possible to render that UI from the server and send only the result to the browser, at any moment.
+
+
+```r
+ui &lt;- fluidPage(
+  h1("Our Mighty App"),
+  radioButtons("format", "Output Type", choices = c("Plot", "Table")),
+  uiOutput("dataOutput")
+)
+server &lt;- function(input, output, session){
+  output$dataOutput &lt;- renderUI({
+    if(input$format == "Table"){
+      tableOutput("table")
+    }else{
+      plotOutput("plot")
+    }
+  })
+  
+  output$table &lt;- renderTable({mtcars})
+  output$plot &lt;- renderPlot({pairs(mtcars)})
+}
+```
+
+
+---
+
+#<i class="fa fa-magic" role="presentation" aria-label="magic icon"></i> Extending Shiny with JavaScript
+
+We have seen how `shiny` provides some pre-built HTML and CSS functionality. But we can also add JavaScript functionality thanks to the library `shinyjs`.
+
+We only need to call `useShinyjs()` anywhere within the UI to add that functionality.
+
+
+```r
+ui &lt;- fluidPage(
+  shinyjs::useShinyjs()
+  # ... UI
+)
+```
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "none",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false,
+"ratio": "16:10",
+"slideNumberFormat": "<div class=\"progress-bar-container\">\n  <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">\n  </div>\n</div>"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
